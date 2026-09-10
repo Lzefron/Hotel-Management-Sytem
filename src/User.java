@@ -17,4 +17,29 @@ public abstract class User {
     }
 
     public abstract String getRole();
+
+    // Returns the user's id.
+    public String getId() {
+        return id;
+    }
+
+    // Returns the user's name.
+    public String getName() {
+        return name;
+    }
+
+    // Returns the user's phone number.
+    public String getPhone() {
+        return phone;
+    }
+
+    // Returns the user's username.
+    public String getUsername() {
+        return username;
+    }
+
+    // Returns the user's password. Used to check login.
+    public String getPassword() {
+        return password;
+    }
 }

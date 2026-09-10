@@ -27,4 +27,9 @@ public class Customer extends User {
     public String getRole() {
         return "Customer";
     }
+
+    // Returns the customer's address.
+    public String getAddress() {
+        return address;
+    }
 }

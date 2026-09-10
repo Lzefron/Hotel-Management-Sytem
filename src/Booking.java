@@ -22,4 +22,34 @@ public class Booking {
     public boolean isExpired() {
         return false;
     }
+
+    // Returns the booking id.
+    public String getBookingId() {
+        return bookingId;
+    }
+
+    // Returns the id of the customer who made this booking.
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    // Returns the booked room number.
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    // Returns the check-in date as text.
+    public String getCheckInDate() {
+        return checkInDate;
+    }
+
+    // Returns how many days the booking is for.
+    public int getDurationDays() {
+        return durationDays;
+    }
+
+    // Returns true if the customer has already checked out.
+    public boolean isCompleted() {
+        return isCompleted;
+    }
 }

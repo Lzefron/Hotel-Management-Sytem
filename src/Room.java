@@ -18,4 +18,19 @@ public class Room {
     public boolean checkAvailability() {
         return isAvailable;
     }
+
+    // Returns the room number.
+    public int getRoomNumber() {
+        return roomNumber;
+    }
+
+    // Returns the room type, for example Single or Double.
+    public String getRoomType() {
+        return roomType;
+    }
+
+    // Returns the price per night.
+    public double getPrice() {
+        return price;
+    }
 }
