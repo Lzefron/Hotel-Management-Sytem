@@ -1,37 +1,48 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class HotelSystem {
-    private List<Room> roomList;
-    private List<Customer> customerList;
-    private List<Booking> bookingList;
-    private List<Admin> adminList;
+    private List<Room> rooms;
+    private List<Customer> customers;
+    private Database database;
 
-    // Creates the empty lists and adds one default admin so the system can be used.
     public HotelSystem() {
-        roomList = new ArrayList<Room>();
-        customerList = new ArrayList<Customer>();
-        bookingList = new ArrayList<Booking>();
-        adminList = new ArrayList<Admin>();
-
-        adminList.add(new Admin("A1", "Main Admin", "0000000000", "admin", "admin123"));
+        this.rooms = new ArrayList<>();
+        this.customers = new ArrayList<>();
+        this.database = new Database();
+        initializeRooms();
+        loadExistingData();
     }
 
-    // ---------- Room methods ----------
+    private void initializeRooms() {
+        rooms.add(new Room(101, "Single Standard", 80.0, true));
+        rooms.add(new Room(102, "Single Deluxe", 100.0, true));
+        rooms.add(new Room(201, "Double Deluxe", 150.0, true));
+        rooms.add(new Room(202, "Double Executive", 180.0, true));
+        rooms.add(new Room(301, "Penthouse Suite", 350.0, true));
+    }
 
-    // Adds a new room to the list. Returns false if the room number already exists.
-    public boolean addRoom(Room room) {
-        if (findRoomByNumber(room.getRoomNumber()) != null) {
-            return false;
+    private void loadExistingData() {
+        this.customers = database.loadCustomersFromFile();
+    }
+
+    public void displayAllAvailableRooms() {
+        System.out.println("\n--- AVAILABLE HOTEL ROOMS ---");
+        boolean found = false;
+        for (Room room : rooms) {
+            if (room.checkAvailability()) {
+                System.out.println(room.getRoomInfo());
+                found = true;
+            }
         }
-        roomList.add(room);
-        return true;
+        if (!found) {
+            System.out.println("No rooms currently available.");
+        }
     }
 
-    // Finds a room by its number. Returns null if no such room exists.
-    public Room findRoomByNumber(int roomNumber) {
-        for (int i = 0; i < roomList.size(); i++) {
-            Room room = roomList.get(i);
+    public Room findRoom(int roomNumber) {
+        for (Room room : rooms) {
             if (room.getRoomNumber() == roomNumber) {
                 return room;
             }
@@ -39,139 +50,90 @@ public class HotelSystem {
         return null;
     }
 
-    // Returns a list of all rooms that are currently free.
-    public List<Room> getAvailableRooms() {
-        List<Room> available = new ArrayList<Room>();
-        for (int i = 0; i < roomList.size(); i++) {
-            Room room = roomList.get(i);
-            if (room.checkAvailability()) {
-                available.add(room);
+    public void startSystem() {
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\n=================================");
+            System.out.println("   GRAND HOTEL MANAGEMENT SYSTEM ");
+            System.out.println("=================================");
+            System.out.println("1. Admin Access");
+            System.out.println("2. Customer Access");
+            System.out.println("3. View Available Rooms");
+            System.out.println("4. Exit");
+            System.out.print("Select role: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter Admin Username: ");
+                    String aName = scanner.nextLine();
+                    System.out.print("Enter Admin Password: ");
+                    String aPass = scanner.nextLine();
+
+                    if (database.verifyAdminLogin(aName, aPass)) {
+                        Admin admin = new Admin("ADM-01", "System Admin", "000-000", aName, aPass);
+                        admin.login(aName, aPass);
+                        admin.adminMenu();
+                    } else {
+                        System.out.println("Invalid Admin Credentials.");
+                    }
+                    break;
+
+                case 2:
+                    System.out.println("\n1. Login");
+                    System.out.println("2. Register");
+                    System.out.print("Choose: ");
+                    int custOpt = scanner.nextInt();
+                    scanner.nextLine();
+
+                    if (custOpt == 1) {
+                        System.out.print("Enter Username: ");
+                        String cName = scanner.nextLine();
+                        System.out.print("Enter Password: ");
+                        String cPass = scanner.nextLine();
+
+                        Customer customer = database.getCustomerByCredentials(cName, cPass);
+                        if (customer != null) {
+                            customer.login(cName, cPass);
+                            customer.customerMenu();
+                        } else {
+                            System.out.println("Invalid customer username or password.");
+                        }
+                    } else if (custOpt == 2) {
+                        System.out.print("Enter ID: ");
+                        String id = scanner.nextLine();
+                        System.out.print("Enter Name: ");
+                        String name = scanner.nextLine();
+                        System.out.print("Enter Phone: ");
+                        String phone = scanner.nextLine();
+                        System.out.print("Enter Username: ");
+                        String uname = scanner.nextLine();
+                        System.out.print("Enter Password: ");
+                        String pass = scanner.nextLine();
+                        System.out.print("Enter Address: ");
+                        String addr = scanner.nextLine();
+
+                        database.writeCustomer(id, name, phone, uname, pass, addr);
+                        System.out.println("Registration complete! You can now log in.");
+                    }
+                    break;
+
+                case 3:
+                    displayAllAvailableRooms();
+                    break;
+
+                case 4:
+                    running = false;
+                    System.out.println("System shutting down. Have a great day!");
+                    break;
+
+                default:
+                    System.out.println("Invalid selection. Try again.");
             }
         }
-        return available;
-    }
-
-    // Returns the full list of rooms.
-    public List<Room> getRoomList() {
-        return roomList;
-    }
-
-    // ---------- Customer methods ----------
-
-    // Adds a new customer. Returns false if the username is already taken.
-    public boolean addCustomer(Customer customer) {
-        if (findCustomerByUsername(customer.getUsername()) != null) {
-            return false;
-        }
-        customerList.add(customer);
-        return true;
-    }
-
-    // Finds a customer by username. Returns null if not found.
-    public Customer findCustomerByUsername(String username) {
-        for (int i = 0; i < customerList.size(); i++) {
-            Customer customer = customerList.get(i);
-            if (customer.getUsername().equals(username)) {
-                return customer;
-            }
-        }
-        return null;
-    }
-
-    // Checks customer username and password. Returns the customer if correct, else null.
-    public Customer loginCustomer(String username, String password) {
-        Customer customer = findCustomerByUsername(username);
-        if (customer != null && customer.getPassword().equals(password)) {
-            return customer;
-        }
-        return null;
-    }
-
-    // Makes a new customer id like C1, C2, C3 based on how many customers exist.
-    public String generateCustomerId() {
-        return "C" + (customerList.size() + 1);
-    }
-
-    // Returns the full list of customers.
-    public List<Customer> getCustomerList() {
-        return customerList;
-    }
-
-    // ---------- Admin methods ----------
-
-    // Adds a new admin. Returns false if the username is already taken.
-    public boolean addAdmin(Admin admin) {
-        if (findAdminByUsername(admin.getUsername()) != null) {
-            return false;
-        }
-        adminList.add(admin);
-        return true;
-    }
-
-    // Finds an admin by username. Returns null if not found.
-    public Admin findAdminByUsername(String username) {
-        for (int i = 0; i < adminList.size(); i++) {
-            Admin admin = adminList.get(i);
-            if (admin.getUsername().equals(username)) {
-                return admin;
-            }
-        }
-        return null;
-    }
-
-    // Checks admin username and password. Returns the admin if correct, else null.
-    public Admin loginAdmin(String username, String password) {
-        Admin admin = findAdminByUsername(username);
-        if (admin != null && admin.getPassword().equals(password)) {
-            return admin;
-        }
-        return null;
-    }
-
-    // Makes a new admin id like A1, A2, A3 based on how many admins exist.
-    public String generateAdminId() {
-        return "A" + (adminList.size() + 1);
-    }
-
-    // ---------- Booking methods ----------
-
-    // Books a room for a customer. Returns the new booking, or null if the room is not free.
-    public Booking bookRoom(Customer customer, int roomNumber, String checkInDate, int durationDays) {
-        Room room = findRoomByNumber(roomNumber);
-        if (room == null || !room.checkAvailability()) {
-            return null;
-        }
-        String bookingId = "B" + (bookingList.size() + 1);
-        Booking booking = new Booking(bookingId, customer.getId(), roomNumber, checkInDate, durationDays, false);
-        bookingList.add(booking);
-        room.setAvailability(false);
-        return booking;
-    }
-
-    // Returns all bookings that belong to the given customer.
-    public List<Booking> getBookingsForCustomer(Customer customer) {
-        List<Booking> result = new ArrayList<Booking>();
-        for (int i = 0; i < bookingList.size(); i++) {
-            Booking booking = bookingList.get(i);
-            if (booking.getCustomerId().equals(customer.getId())) {
-                result.add(booking);
-            }
-        }
-        return result;
-    }
-
-    // Returns the full list of bookings.
-    public List<Booking> getBookingList() {
-        return bookingList;
-    }
-
-    // ---------- File methods (to be done by another team member) ----------
-
-    // Loads rooms, customers and bookings from files.
-    public void loadDataFromFiles() {
-    }
-
-    // Saves rooms, customers and bookings to files.
-    public void saveDataToFiles() {
     }
 }

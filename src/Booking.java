@@ -15,41 +15,57 @@ public class Booking {
         this.isCompleted = isCompleted;
     }
 
-    public double calculateBill() {
-        return 0.0;
-    }
-
-    public boolean isExpired() {
-        return false;
-    }
-
-    // Returns the booking id.
     public String getBookingId() {
         return bookingId;
     }
 
-    // Returns the id of the customer who made this booking.
+    public void setBookingId(String bookingId) {
+        this.bookingId = bookingId;
+    }
+
     public String getCustomerId() {
         return customerId;
     }
 
-    // Returns the booked room number.
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
+
     public int getRoomNumber() {
         return roomNumber;
     }
 
-    // Returns the check-in date as text.
+    public void setRoomNumber(int roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
     public String getCheckInDate() {
         return checkInDate;
     }
 
-    // Returns how many days the booking is for.
+    public void setCheckInDate(String checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
     public int getDurationDays() {
         return durationDays;
     }
 
-    // Returns true if the customer has already checked out.
+    public void setDurationDays(int durationDays) {
+        this.durationDays = durationDays;
+    }
+
     public boolean isCompleted() {
         return isCompleted;
+    }
+
+    public void setCompleted(boolean completed) {
+        isCompleted = completed;
+    }
+
+    public String getBookingDetails() {
+        String status = isCompleted ? "Completed" : "Active";
+        return "Booking ID: " + bookingId + " | Customer ID: " + customerId + " | Room: " + roomNumber +
+                " | Check-In: " + checkInDate + " | Duration: " + durationDays + " days | Status: " + status;
     }
 }

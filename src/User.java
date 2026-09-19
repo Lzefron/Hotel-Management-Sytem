@@ -4,6 +4,7 @@ public abstract class User {
     private String phone;
     private String username;
     private String password;
+    protected boolean isLoggedIn;
 
     public User(String id, String name, String phone, String username, String password) {
         this.id = id;
@@ -11,35 +12,69 @@ public abstract class User {
         this.phone = phone;
         this.username = username;
         this.password = password;
-    }
-
-    public void logout() {
+        this.isLoggedIn = false;
     }
 
     public abstract String getRole();
 
-    // Returns the user's id.
+    public boolean login(String inputUsername, String inputPassword) {
+        if (this.username.equals(inputUsername) && this.password.equals(inputPassword)) {
+            this.isLoggedIn = true;
+            System.out.println(getRole() + " " + name + " logged in successfully.");
+            return true;
+        } else {
+            this.isLoggedIn = false;
+            System.out.println("Invalid credentials for " + inputUsername);
+            return false;
+        }
+    }
+
+    public void logout() {
+        this.isLoggedIn = false;
+        System.out.println(getRole() + " " + username + " logged out.");
+    }
+
+    public boolean isUserLoggedIn() {
+        return isLoggedIn;
+    }
+
     public String getId() {
         return id;
     }
 
-    // Returns the user's name.
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
-    // Returns the user's phone number.
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPhone() {
         return phone;
     }
 
-    // Returns the user's username.
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public String getUsername() {
         return username;
     }
 
-    // Returns the user's password. Used to check login.
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
