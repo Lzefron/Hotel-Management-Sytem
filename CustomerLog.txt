@@ -1,2 +1,4 @@
 123,mahin sikder,019292393,zefron,1234,4/2 narinda 
 234,made,0294393,ji,123,sjdjdjd
+CUST-1003,mahin,12345,mahin,mahin,123
+CUST-1004,mahin,2345,mahins,1234,1234

@@ -1,50 +1,44 @@
 public class Room {
     private int roomNumber;
     private String roomType;
-    private double price;
+    private String bedType;
+    private double pricePerNight;
     private boolean isAvailable;
 
-    public Room(int roomNumber, String roomType, double price, boolean isAvailable) {
+    public Room(int roomNumber, String roomType, String bedType, double pricePerNight, boolean isAvailable) {
         this.roomNumber = roomNumber;
         this.roomType = roomType;
-        this.price = price;
+        this.bedType = bedType;
+        this.pricePerNight = pricePerNight;
         this.isAvailable = isAvailable;
     }
 
-    public int getRoomNumber() {
-        return roomNumber;
+    public double calculateStayPrice(int numberOfNights) {
+        if (numberOfNights <= 0) {
+            return 0.0;
+        }
+        return this.pricePerNight * numberOfNights;
     }
 
-    public void setRoomNumber(int roomNumber) {
-        this.roomNumber = roomNumber;
+    public boolean reserveRoom() {
+        if (this.isAvailable) {
+            this.isAvailable = false;
+            return true;
+        }
+        return false;
     }
 
-    public String getRoomType() {
-        return roomType;
+    public void releaseRoom() {
+        this.isAvailable = true;
     }
 
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
+    public String getDisplayLabel() {
+        return "Room " + roomNumber + " | " + roomType + " (" + bedType + ") - $" + pricePerNight + "/night";
     }
 
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public boolean checkAvailability() {
-        return isAvailable;
-    }
-
-    public void setAvailability(boolean status) {
-        this.isAvailable = status;
-    }
-
-    public String getRoomInfo() {
-        String status = isAvailable ? "Available" : "Occupied";
-        return "Room " + roomNumber + " [" + roomType + "] - $" + price + "/night (" + status + ")";
-    }
+    public int getRoomNumber() { return roomNumber; }
+    public String getRoomType() { return roomType; }
+    public String getBedType() { return bedType; }
+    public double getPricePerNight() { return pricePerNight; }
+    public boolean isAvailable() { return isAvailable; }
 }

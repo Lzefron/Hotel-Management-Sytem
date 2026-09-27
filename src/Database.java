@@ -4,221 +4,202 @@ import java.util.List;
 
 public class Database {
 
-    public void createAdminFile() {
+    private void verifyOrCreateFile(String fileName) {
         try {
-            File file = new File("AdminLog.txt");
-            if (file.createNewFile()) {
-                System.out.println("Admin log created: " + file.getName());
+            File file = new File(fileName);
+            if (!file.exists()) {
+                file.createNewFile();
             }
         } catch (IOException e) {
-            System.out.println("Error creating Admin file.");
-            e.printStackTrace();
+            System.err.println("Database Error: Could not initialize file " + fileName);
         }
     }
 
-    public void createCustomerFile() {
-        try {
-            File file = new File("CustomerLog.txt");
-            if (file.createNewFile()) {
-                System.out.println("Customer log created: " + file.getName());
-            }
+    public boolean writeCustomerRecord(String id, String name, String phone, String username, String password, String address) {
+        verifyOrCreateFile("CustomerLog.txt");
+
+        if (isUsernameTaken(username)) {
+            return false;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CustomerLog.txt", true))) {
+            writer.write(id + "," + name + "," + phone + "," + username + "," + password + "," + address);
+            writer.newLine();
+            return true;
         } catch (IOException e) {
-            System.out.println("Error creating Customer file.");
-            e.printStackTrace();
+            System.err.println("Error writing to CustomerLog.txt");
+            return false;
         }
     }
 
-    public void createBookingFile() {
-        try {
-            File file = new File("BookingLog.txt");
-            if (file.createNewFile()) {
-                System.out.println("Booking log created: " + file.getName());
-            }
+    public boolean writeBookingRecord(String bookingId, String username, int roomNumber, String roomType, double price, String date, int days) {
+        verifyOrCreateFile("BookingLog.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("BookingLog.txt", true))) {
+            writer.write(bookingId + "," + username + "," + roomNumber + "," + roomType + "," + price + "," + date + "," + days);
+            writer.newLine();
+            return true;
         } catch (IOException e) {
-            System.out.println("Error creating Booking file.");
-            e.printStackTrace();
+            System.err.println("Error writing to BookingLog.txt");
+            return false;
         }
     }
 
-    public void writeAdmin(String username, String password) {
-        createAdminFile();
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("AdminLog.txt", true))) {
-            bw.write(username + "," + password);
-            bw.newLine();
-            System.out.println("Admin saved successfully.");
-        } catch (IOException e) {
-            System.out.println("Error writing Admin data.");
-            e.printStackTrace();
-        }
-    }
-
-    public void writeCustomer(String id, String name, String phone, String username, String password, String address) {
-        createCustomerFile();
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("CustomerLog.txt", true))) {
-            bw.write(id + "," + name + "," + phone + "," + username + "," + password + "," + address);
-            bw.newLine();
-            System.out.println("Customer registered successfully.");
-        } catch (IOException e) {
-            System.out.println("Error writing Customer data.");
-            e.printStackTrace();
-        }
-    }
-
-    public void writeBooking(String bookingId, String customerId, int roomNumber, String checkInDate, int durationDays) {
-        createBookingFile();
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("BookingLog.txt", true))) {
-            bw.write(bookingId + "," + customerId + "," + roomNumber + "," + checkInDate + "," + durationDays);
-            bw.newLine();
-            System.out.println("Booking recorded successfully.");
-        } catch (IOException e) {
-            System.out.println("Error writing Booking data.");
-            e.printStackTrace();
-        }
-    }
-
-    public void readAllCustomers() {
-        File file = new File("CustomerLog.txt");
-        if (!file.exists()) {
-            System.out.println("No customer records found.");
-            return;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            System.out.println("\n--- REGISTERED CUSTOMERS ---");
-            System.out.println("ID | Name | Phone | Username | Address");
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 6) {
-                    System.out.println(data[0] + " | " + data[1] + " | " + data[2] + " | " + data[3] + " | " + data[5]);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading Customer log.");
-            e.printStackTrace();
-        }
-    }
-
-    public void viewAllBookings() {
-        File file = new File("BookingLog.txt");
-        if (!file.exists()) {
-            System.out.println("No booking records found.");
-            return;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            System.out.println("\n--- CURRENT BOOKINGS ---");
-            System.out.println("BookingID | CustomerID | RoomNo | CheckInDate | Days");
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 5) {
-                    System.out.println(data[0] + " | Customer: " + data[1] + " | Room: " + data[2] + " | Date: " + data[3] + " | Duration: " + data[4] + " days");
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading Bookings log.");
-            e.printStackTrace();
-        }
-    }
-
-    public boolean verifyAdminLogin(String username, String password) {
-        if ("admin".equals(username) && "admin".equals(password)) {
+    public boolean verifyAdminCredentials(String username, String password) {
+        if ("admin".equalsIgnoreCase(username.trim()) && "admin".equals(password.trim())) {
             return true;
         }
 
         File file = new File("AdminLog.txt");
         if (!file.exists()) return false;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 2 && data[0].equals(username) && data[1].equals(password)) {
-                    return true;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    if (tokens[0].trim().equals(username.trim()) && tokens[1].trim().equals(password.trim())) {
+                        return true;
+                    }
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error verifying Admin login.");
+            System.err.println("Error verifying admin records.");
         }
         return false;
     }
 
-    public Customer getCustomerByCredentials(String username, String password) {
+    public Customer authenticateCustomer(String username, String password) {
         File file = new File("CustomerLog.txt");
         if (!file.exists()) return null;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 6 && data[3].equals(username) && data[4].equals(password)) {
-                    return new Customer(data[0], data[1], data[2], data[3], data[4], data[5]);
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 6) {
+                    String storedUname = tokens[3].trim();
+                    String storedPass = tokens[4].trim();
+                    if (storedUname.equals(username.trim()) && storedPass.equals(password.trim())) {
+                        return new Customer(tokens[0].trim(), tokens[1].trim(), tokens[2].trim(), storedUname, storedPass, tokens[5].trim());
+                    }
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error reading Customer log.");
+            System.err.println("Error reading customer credentials.");
         }
         return null;
     }
 
-    public List<Customer> loadCustomersFromFile() {
-        List<Customer> list = new ArrayList<>();
+    public boolean isUsernameTaken(String username) {
         File file = new File("CustomerLog.txt");
-        if (!file.exists()) return list;
+        if (!file.exists()) return false;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 6) {
-                    list.add(new Customer(data[0], data[1], data[2], data[3], data[4], data[5]));
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 4 && tokens[3].trim().equalsIgnoreCase(username.trim())) {
+                    return true;
                 }
             }
         } catch (IOException e) {
-            System.out.println("Error loading customers into memory.");
+            System.err.println("Error checking username uniqueness.");
         }
-        return list;
+        return false;
     }
+
+    public List<Booking> fetchBookingsByUsername(String username) {
+        List<Booking> userBookings = new ArrayList<>();
+        File file = new File("BookingLog.txt");
+        if (!file.exists()) return userBookings;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 7 && tokens[1].trim().equalsIgnoreCase(username.trim())) {
+                    userBookings.add(new Booking(
+                            tokens[0].trim(),
+                            tokens[1].trim(),
+                            Integer.parseInt(tokens[2].trim()),
+                            tokens[3].trim(),
+                            Double.parseDouble(tokens[4].trim()),
+                            tokens[5].trim(),
+                            Integer.parseInt(tokens[6].trim())
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading personal bookings.");
+        }
+        return userBookings;
+    }
+
+    public List<Booking> fetchAllBookings() {
+        List<Booking> allBookings = new ArrayList<>();
+        File file = new File("BookingLog.txt");
+        if (!file.exists()) return allBookings;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 7) {
+                    allBookings.add(new Booking(
+                            tokens[0].trim(),
+                            tokens[1].trim(),
+                            Integer.parseInt(tokens[2].trim()),
+                            tokens[3].trim(),
+                            Double.parseDouble(tokens[4].trim()),
+                            tokens[5].trim(),
+                            Integer.parseInt(tokens[6].trim())
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading all global bookings.");
+        }
+        return allBookings;
+    }
+
+    public List<Customer> fetchAllCustomers() {
+        List<Customer> customerList = new ArrayList<>();
+        File file = new File("CustomerLog.txt");
+        if (!file.exists()) return customerList;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 6) {
+                    customerList.add(new Customer(
+                            tokens[0].trim(),
+                            tokens[1].trim(),
+                            tokens[2].trim(),
+                            tokens[3].trim(),
+                            tokens[4].trim(),
+                            tokens[5].trim()
+                    ));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error loading customer database.");
+        }
+        return customerList;
+    }
+
     public String generateNextCustomerId() {
         File file = new File("CustomerLog.txt");
         if (!file.exists()) return "CUST-1001";
 
-        int count = 1000;
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            while (br.readLine() != null) {
-                count++;
+        int totalRecords = 1000;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            while (reader.readLine() != null) {
+                totalRecords++;
             }
         } catch (IOException e) {
-            System.out.println("Error calculating Customer ID.");
+            System.err.println("Error generating ID.");
         }
-        return "CUST-" + (count + 1);
-    }
-
-    public void viewBookingsForCustomer(String targetCustomerId) {
-        File file = new File("BookingLog.txt");
-        if (!file.exists()) {
-            System.out.println("No booking records found.");
-            return;
-        }
-
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            boolean found = false;
-            System.out.println("\n--- YOUR BOOKINGS ---");
-            System.out.println("BookingID | RoomNo | CheckInDate | Days");
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                if (data.length >= 5 && data[1].trim().equals(targetCustomerId.trim())) {
-                    System.out.println(data[0] + " | Room: " + data[2] + " | Date: " + data[3] + " | Duration: " + data[4] + " days");
-                    found = true;
-                }
-            }
-            if (!found) {
-                System.out.println("No active bookings found for your ID.");
-            }
-        } catch (IOException e) {
-            System.out.println("Error reading Bookings log.");
-        }
+        return "CUST-" + (totalRecords + 1);
     }
 }

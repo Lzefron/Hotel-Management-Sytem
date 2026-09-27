@@ -1,71 +1,38 @@
 public class Booking {
     private String bookingId;
-    private String customerId;
+    private String username;
     private int roomNumber;
+    private String roomType;
+    private double pricePerNight;
     private String checkInDate;
     private int durationDays;
-    private boolean isCompleted;
 
-    public Booking(String bookingId, String customerId, int roomNumber, String checkInDate, int durationDays, boolean isCompleted) {
+    public Booking(String bookingId, String username, int roomNumber, String roomType, double pricePerNight, String checkInDate, int durationDays) {
         this.bookingId = bookingId;
-        this.customerId = customerId;
+        this.username = username;
         this.roomNumber = roomNumber;
+        this.roomType = roomType;
+        this.pricePerNight = pricePerNight;
         this.checkInDate = checkInDate;
         this.durationDays = durationDays;
-        this.isCompleted = isCompleted;
     }
 
-    public String getBookingId() {
-        return bookingId;
+    public double calculateTotalBill() {
+        if (durationDays <= 0) return 0.0;
+        return pricePerNight * durationDays;
     }
 
-    public void setBookingId(String bookingId) {
-        this.bookingId = bookingId;
+    public boolean isValidBooking() {
+        return bookingId != null && !bookingId.trim().isEmpty()
+                && username != null && !username.trim().isEmpty()
+                && roomNumber > 0 && durationDays > 0;
     }
 
-    public String getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(String customerId) {
-        this.customerId = customerId;
-    }
-
-    public int getRoomNumber() {
-        return roomNumber;
-    }
-
-    public void setRoomNumber(int roomNumber) {
-        this.roomNumber = roomNumber;
-    }
-
-    public String getCheckInDate() {
-        return checkInDate;
-    }
-
-    public void setCheckInDate(String checkInDate) {
-        this.checkInDate = checkInDate;
-    }
-
-    public int getDurationDays() {
-        return durationDays;
-    }
-
-    public void setDurationDays(int durationDays) {
-        this.durationDays = durationDays;
-    }
-
-    public boolean isCompleted() {
-        return isCompleted;
-    }
-
-    public void setCompleted(boolean completed) {
-        isCompleted = completed;
-    }
-
-    public String getBookingDetails() {
-        String status = isCompleted ? "Completed" : "Active";
-        return "Booking ID: " + bookingId + " | Customer ID: " + customerId + " | Room: " + roomNumber +
-                " | Check-In: " + checkInDate + " | Duration: " + durationDays + " days | Status: " + status;
-    }
+    public String getBookingId() { return bookingId; }
+    public String getUsername() { return username; }
+    public int getRoomNumber() { return roomNumber; }
+    public String getRoomType() { return roomType; }
+    public double getPricePerNight() { return pricePerNight; }
+    public String getCheckInDate() { return checkInDate; }
+    public int getDurationDays() { return durationDays; }
 }

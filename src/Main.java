@@ -1,6 +1,10 @@
+import javax.swing.SwingUtilities;
+
 public class Main {
     public static void main(String[] args) {
-        HotelSystem hotelSystem = new HotelSystem();
-        hotelSystem.startSystem();
+        SwingUtilities.invokeLater(() -> {
+            HotelGUI appGUI = new HotelGUI();
+            appGUI.launchApp();
+        });
     }
 }
