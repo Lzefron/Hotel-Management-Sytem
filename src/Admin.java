@@ -1,11 +1,35 @@
+import java.io.*;
 import java.util.List;
 
 public class Admin extends User {
-    private Database database;
+    private static final String FILE_NAME = "AdminLog.txt";
 
     public Admin(String id, String name, String phone, String username, String password) {
         super(id, name, phone, username, password);
-        this.database = new Database();
+    }
+
+    public static boolean verifyAdminCredentials(String username, String password) {
+        if ("admin".equalsIgnoreCase(username.trim()) && "admin".equals(password.trim())) {
+            return true;
+        }
+
+        File file = new File(FILE_NAME);
+        if (!file.exists()) return false;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] tokens = line.split(",");
+                if (tokens.length >= 2) {
+                    if (tokens[0].trim().equals(username.trim()) && tokens[1].trim().equals(password.trim())) {
+                        return true;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error verifying admin records.");
+        }
+        return false;
     }
 
     @Override
@@ -23,7 +47,7 @@ public class Admin extends User {
         }
 
         String bookingId = "BK-" + (1000 + (int)(Math.random() * 9000));
-        return database.writeBookingRecord(
+        return Booking.saveBookingRecord(
                 bookingId,
                 targetUsername.trim(),
                 room.getRoomNumber(),
@@ -35,11 +59,11 @@ public class Admin extends User {
     }
 
     public List<Booking> getAllGlobalBookings() {
-        return database.fetchAllBookings();
+        return Booking.fetchAllBookings();
     }
 
     public List<Customer> getAllRegisteredCustomers() {
-        return database.fetchAllCustomers();
+        return Customer.fetchAllCustomers();
     }
 
     public double calculateTotalRevenue() {

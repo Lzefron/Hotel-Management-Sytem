@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class HotelGUI {
@@ -12,35 +11,21 @@ public class HotelGUI {
     private static final Font LABEL_FONT    = new Font("Segoe UI", Font.PLAIN, 12);
     private static final Font INPUT_FONT    = new Font("Segoe UI", Font.PLAIN, 12);
 
-    private Database database;
     private List<Room> roomInventory;
 
     public HotelGUI() {
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-
+            // Fallback to default look and feel
         }
 
-        this.database = new Database();
-        this.roomInventory = buildDefaultRooms();
-    }
-
-    private List<Room> buildDefaultRooms() {
-        List<Room> rooms = new ArrayList<>();
-        rooms.add(new Room(101, "Economy", "Single Bed", 50.0, true));
-        rooms.add(new Room(102, "Standard", "Double Bed", 90.0, true));
-        rooms.add(new Room(201, "Deluxe", "Twin Bed", 140.0, true));
-        rooms.add(new Room(301, "Executive VIP Suite", "King Size Bed", 250.0, true));
-        rooms.add(new Room(401, "Presidential Penthouse", "Master Suite King Bed", 500.0, true));
-        return rooms;
+        this.roomInventory = Room.getDefaultInventory();
     }
 
     public void launchApp() {
         SwingUtilities.invokeLater(this::showWelcomeWindow);
     }
-
 
     private void showWelcomeWindow() {
         JFrame frame = new JFrame("Grand Hotel Management System");
@@ -52,7 +37,6 @@ public class HotelGUI {
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 
-
         JPanel headerPanel = new JPanel(new GridLayout(2, 1, 4, 4));
         JLabel lblTitle = new JLabel("WELCOME TO GRAND HOTEL", SwingConstants.CENTER);
         lblTitle.setFont(TITLE_FONT);
@@ -63,7 +47,6 @@ public class HotelGUI {
 
         headerPanel.add(lblTitle);
         headerPanel.add(lblSubtitle);
-
 
         JPanel buttonPanel = new JPanel(new GridLayout(4, 1, 10, 10));
 
@@ -82,7 +65,6 @@ public class HotelGUI {
 
         frame.add(mainPanel);
 
-
         btnCustomerPortal.addActionListener(e -> {
             frame.dispose();
             showCustomerLoginWindow();
@@ -99,7 +81,6 @@ public class HotelGUI {
 
         frame.setVisible(true);
     }
-
 
     private void showCustomerLoginWindow() {
         JFrame frame = new JFrame("Customer Portal - Authentication");
@@ -156,7 +137,7 @@ public class HotelGUI {
             String uname = txtUsername.getText().trim();
             String pass = new String(txtPassword.getPassword()).trim();
 
-            Customer customer = database.authenticateCustomer(uname, pass);
+            Customer customer = Customer.authenticateCustomer(uname, pass);
             if (customer != null) {
                 customer.login(uname, pass);
                 frame.dispose();
@@ -173,7 +154,6 @@ public class HotelGUI {
 
         frame.setVisible(true);
     }
-
 
     private void showAdminLoginWindow() {
         JFrame frame = new JFrame("Admin Portal - Authentication");
@@ -230,7 +210,7 @@ public class HotelGUI {
             String uname = txtUsername.getText().trim();
             String pass = new String(txtPassword.getPassword()).trim();
 
-            if (database.verifyAdminCredentials(uname, pass)) {
+            if (Admin.verifyAdminCredentials(uname, pass)) {
                 Admin admin = new Admin("ADM-01", "System Admin", "000-000", uname, pass);
                 admin.login(uname, pass);
                 frame.dispose();
@@ -248,7 +228,6 @@ public class HotelGUI {
         frame.setVisible(true);
     }
 
-
     private void showRegistrationDialog(Component parentComponent) {
         JTextField txtName = new JTextField();
         JTextField txtPhone = new JTextField();
@@ -257,7 +236,7 @@ public class HotelGUI {
         JPasswordField txtRegPassConfirm = new JPasswordField();
         JTextField txtAddr = new JTextField();
 
-        String autoId = database.generateNextCustomerId();
+        String autoId = Customer.generateNextCustomerId();
 
         Object[] formFields = {
                 "System ID: " + autoId,
@@ -288,7 +267,7 @@ public class HotelGUI {
                 return;
             }
 
-            boolean registered = database.writeCustomerRecord(autoId, name, phone, uname, pass1, addr);
+            boolean registered = Customer.registerCustomerRecord(autoId, name, phone, uname, pass1, addr);
             if (registered) {
                 JOptionPane.showMessageDialog(parentComponent, "Registration successful! You can now log in via Customer Portal.");
             } else {
@@ -305,7 +284,6 @@ public class HotelGUI {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(LABEL_FONT);
-
 
         JPanel bookPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         bookPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -332,7 +310,6 @@ public class HotelGUI {
         bookPanel.add(new JLabel(""));
         bookPanel.add(btnSubmitBooking);
 
-
         JPanel historyPanel = new JPanel(new BorderLayout());
         DefaultTableModel tableModel = new DefaultTableModel(
                 new String[]{"Booking ID", "Username", "Room No", "Room Type", "Price/Night", "Check-In", "Days", "Total Cost"}, 0
@@ -350,7 +327,6 @@ public class HotelGUI {
 
         tabbedPane.addTab("Reserve Room", bookPanel);
         tabbedPane.addTab("My Personal Bookings", historyPanel);
-
 
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -408,7 +384,6 @@ public class HotelGUI {
         frame.setVisible(true);
     }
 
-
     private void showAdminDashboard(Admin admin) {
         JFrame frame = new JFrame("Admin Control Console - Logged in as: " + admin.getUsername());
         frame.setSize(880, 540);
@@ -417,7 +392,6 @@ public class HotelGUI {
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(LABEL_FONT);
-
 
         JPanel globalBookingsPanel = new JPanel(new BorderLayout());
         DefaultTableModel bookingsModel = new DefaultTableModel(
@@ -434,7 +408,6 @@ public class HotelGUI {
         bookingsFooter.add(btnRefreshBookings);
         globalBookingsPanel.add(bookingsFooter, BorderLayout.SOUTH);
 
-
         JPanel customersPanel = new JPanel(new BorderLayout());
         DefaultTableModel customersModel = new DefaultTableModel(
                 new String[]{"Customer ID", "Name", "Phone", "Username", "Address"}, 0
@@ -444,7 +417,6 @@ public class HotelGUI {
         customersPanel.add(new JScrollPane(customersTable), BorderLayout.CENTER);
         JButton btnRefreshCustomers = createStandardButton("Refresh Directory");
         customersPanel.add(btnRefreshCustomers, BorderLayout.SOUTH);
-
 
         JPanel walkInPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         walkInPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -478,7 +450,6 @@ public class HotelGUI {
         tabbedPane.addTab("Customer Directory", customersPanel);
         tabbedPane.addTab("Walk-in Reservation", walkInPanel);
 
-        // Header Navigation
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel lblHeader = createStandardLabel("ADMINISTRATION CONTROL CONSOLE");
@@ -551,7 +522,6 @@ public class HotelGUI {
         refreshCustomers.run();
         frame.setVisible(true);
     }
-
 
     private JButton createStandardButton(String text) {
         JButton btn = new JButton(text);
