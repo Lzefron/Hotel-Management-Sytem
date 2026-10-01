@@ -8,7 +8,7 @@
 |:--:|:-------------|:--:|
 | 1 | MD Mahin Sikder-L | 2024200000572 |
 | 2 | Farjana Khatun Munni | 2024100000386 |
-| 3 | Sayem Al Hasan | 2024200000085 |
+| 3 | Sayeem Al Hasan | 2024200000085 |
 | 4 | Swehinu Marma Boishakhi | 2024100000140 |
 | 5 | Nargis Akter | 2024100000030 |
 
